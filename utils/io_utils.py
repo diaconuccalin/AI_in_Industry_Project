@@ -4,7 +4,7 @@ import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 
 
-def display_graph(the_graph):
+def display_graphviz_graph(the_graph):
     the_graph = the_graph.pipe(format="png")
 
     sio = io.BytesIO()
