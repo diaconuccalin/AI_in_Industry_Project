@@ -8,6 +8,7 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import torch
 from causalgen import Generator
 
 from utils.math_utils import *
@@ -48,7 +49,8 @@ def sanity_check(csuite_dataset, samples=None, original_data_base_path="data/csu
     return None
 
 
-def lingauss(no_of_samples):
+# Possible adjacency graph formats: list (matrix as list of lists), numpy (2d numpy array), torch (torch tensor)
+def lingauss(no_of_samples, generate_data=True, return_adjacency_graph=False, adjacency_graph_format="torch"):
     dg = Generator(seed=SEED)
 
     dg.normal(mu=0, sigma=1, hidden=False, name="x_0")
@@ -56,10 +58,30 @@ def lingauss(no_of_samples):
 
     dg.descendant(lambda x_0, z_1: 0.5 * x_0 + (np.sqrt(3) / 2) * z_1, hidden=False, name="x_1")
 
-    return dg.generate(num=no_of_samples, hidden=False)
+    to_return = tuple()
+    if generate_data:
+        if no_of_samples < 2:
+            no_of_samples = 1
+        to_return += (dg.generate(num=no_of_samples, hidden=False),)
+    if return_adjacency_graph:
+        adjacency_graph = [
+            [0, 1],
+            [0, 0]
+        ]
+
+        if adjacency_graph_format == "list":
+            to_return += (adjacency_graph,)
+        else:
+            adjacency_graph = np.array(adjacency_graph)
+            if adjacency_graph_format == "numpy":
+                to_return += (adjacency_graph,)
+            else:
+                to_return += (torch.tensor(adjacency_graph),)
+
+    return to_return
 
 
-def linexp(no_of_samples):
+def linexp(no_of_samples, generate_data=True, return_adjacency_graph=False, adjacency_graph_format="torch"):
     dg = Generator(seed=SEED)
 
     dg.exponential(scale=1, hidden=True, name="z_0")
@@ -68,10 +90,30 @@ def linexp(no_of_samples):
     dg.descendant(lambda z_0: z_0 - 1, hidden=False, name="x_0")
     dg.descendant(lambda x_0, z_1: 0.5 * x_0 + (np.sqrt(3) / 2) * (z_1 - 1), hidden=False, name="x_1")
 
-    return dg.generate(num=no_of_samples, hidden=False)
+    to_return = tuple()
+    if generate_data:
+        if no_of_samples < 2:
+            no_of_samples = 1
+        to_return += (dg.generate(num=no_of_samples, hidden=False),)
+    if return_adjacency_graph:
+        adjacency_graph = [
+            [0, 1],
+            [0, 0]
+        ]
+
+        if adjacency_graph_format == "list":
+            to_return += (adjacency_graph,)
+        else:
+            adjacency_graph = np.array(adjacency_graph)
+            if adjacency_graph_format == "numpy":
+                to_return += (adjacency_graph,)
+            else:
+                to_return += (torch.tensor(adjacency_graph),)
+
+    return to_return
 
 
-def nonlingauss(no_of_samples):
+def nonlingauss(no_of_samples, generate_data=True, return_adjacency_graph=False, adjacency_graph_format="torch"):
     alpha = np.sqrt(1 - 6 * ((1 / np.sqrt(5)) - (1 / 3)))
 
     dg = Generator(seed=SEED)
@@ -81,11 +123,31 @@ def nonlingauss(no_of_samples):
 
     dg.descendant(lambda x_0, z_1: (np.sqrt(6) * np.exp(-(x_0 ** 2))) + alpha * z_1, hidden=False, name="x_1")
 
-    return dg.generate(num=no_of_samples, hidden=False)
+    to_return = tuple()
+    if generate_data:
+        if no_of_samples < 2:
+            no_of_samples = 1
+        to_return += (dg.generate(num=no_of_samples, hidden=False),)
+    if return_adjacency_graph:
+        adjacency_graph = [
+            [0, 1],
+            [0, 0]
+        ]
+
+        if adjacency_graph_format == "list":
+            to_return += (adjacency_graph,)
+        else:
+            adjacency_graph = np.array(adjacency_graph)
+            if adjacency_graph_format == "numpy":
+                to_return += (adjacency_graph,)
+            else:
+                to_return += (torch.tensor(adjacency_graph),)
+
+    return to_return
 
 
 # noinspection PyTypeChecker
-def nonlin_simpson(no_of_samples):
+def nonlin_simpson(no_of_samples, generate_data=True, return_adjacency_graph=False, adjacency_graph_format="torch"):
     dg = Generator(seed=SEED)
 
     dg.normal(mu=0, sigma=1, hidden=False, name="x_0")
@@ -103,11 +165,33 @@ def nonlin_simpson(no_of_samples):
         name="x_3"
     )
 
-    return dg.generate(num=no_of_samples, hidden=False)
+    to_return = tuple()
+    if generate_data:
+        if no_of_samples < 2:
+            no_of_samples = 1
+        to_return += (dg.generate(num=no_of_samples, hidden=False),)
+    if return_adjacency_graph:
+        adjacency_graph = [
+            [0, 1, 1, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+            [0, 0, 0, 0]
+        ]
+
+        if adjacency_graph_format == "list":
+            to_return += (adjacency_graph,)
+        else:
+            adjacency_graph = np.array(adjacency_graph)
+            if adjacency_graph_format == "numpy":
+                to_return += (adjacency_graph,)
+            else:
+                to_return += (torch.tensor(adjacency_graph),)
+
+    return to_return
 
 
 # noinspection PyTypeChecker
-def symprod_simpson(no_of_samples):
+def symprod_simpson(no_of_samples, generate_data=True, return_adjacency_graph=False, adjacency_graph_format="torch"):
     dg = Generator(seed=SEED)
 
     dg.normal(mu=0, sigma=1, hidden=False, name="x_0")
@@ -132,11 +216,33 @@ def symprod_simpson(no_of_samples):
         name="x_3"
     )
 
-    return dg.generate(num=no_of_samples, hidden=False)
+    to_return = tuple()
+    if generate_data:
+        if no_of_samples < 2:
+            no_of_samples = 1
+        to_return += (dg.generate(num=no_of_samples, hidden=False),)
+    if return_adjacency_graph:
+        adjacency_graph = [
+            [0, 1, 1, 1],
+            [0, 0, 1, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ]
+
+        if adjacency_graph_format == "list":
+            to_return += (adjacency_graph,)
+        else:
+            adjacency_graph = np.array(adjacency_graph)
+            if adjacency_graph_format == "numpy":
+                to_return += (adjacency_graph,)
+            else:
+                to_return += (torch.tensor(adjacency_graph),)
+
+    return to_return
 
 
 # noinspection PyTypeChecker
-def large_backdoor(no_of_samples):
+def large_backdoor(no_of_samples, generate_data=True, return_adjacency_graph=False, adjacency_graph_format="torch"):
     dg = Generator(seed=SEED)
 
     dg.normal(mu=0, sigma=1, hidden=True, name="z_0")
@@ -167,11 +273,38 @@ def large_backdoor(no_of_samples):
         name="x_8"
     )
 
-    return dg.generate(num=no_of_samples, hidden=False)
+    to_return = tuple()
+    if generate_data:
+        if no_of_samples < 2:
+            no_of_samples = 1
+        to_return += (dg.generate(num=no_of_samples, hidden=False),)
+    if return_adjacency_graph:
+        adjacency_graph = [
+            [0, 1, 1, 0, 0, 0, 0, 0, 0],  # x0
+            [0, 0, 0, 1, 0, 0, 0, 0, 0],  # x1
+            [0, 0, 0, 0, 1, 0, 0, 0, 0],  # x2
+            [0, 0, 0, 0, 0, 1, 0, 0, 0],  # x3
+            [0, 0, 0, 0, 0, 0, 1, 0, 0],  # x4
+            [0, 0, 0, 0, 0, 0, 0, 1, 0],  # x5
+            [0, 0, 0, 0, 0, 0, 0, 0, 1],  # x6
+            [0, 0, 0, 0, 0, 0, 0, 0, 1],  # x7
+            [0, 0, 0, 0, 0, 0, 0, 0, 0]   # x8
+        ]
+
+        if adjacency_graph_format == "list":
+            to_return += (adjacency_graph,)
+        else:
+            adjacency_graph = np.array(adjacency_graph)
+            if adjacency_graph_format == "numpy":
+                to_return += (adjacency_graph,)
+            else:
+                to_return += (torch.tensor(adjacency_graph),)
+
+    return to_return
 
 
 # noinspection PyTypeChecker
-def weak_arrows(no_of_samples):
+def weak_arrows(no_of_samples, generate_data=True, return_adjacency_graph=False, adjacency_graph_format="torch"):
     dg = Generator(seed=SEED)
 
     dg.normal(mu=0, sigma=1, hidden=True, name="z_0")
@@ -208,4 +341,31 @@ def weak_arrows(no_of_samples):
         name="x_8"
     )
 
-    return dg.generate(num=no_of_samples, hidden=False)
+    to_return = tuple()
+    if generate_data:
+        if no_of_samples < 2:
+            no_of_samples = 1
+        to_return += (dg.generate(num=no_of_samples, hidden=False),)
+    if return_adjacency_graph:
+        adjacency_graph = [
+            [0, 1, 1, 0, 0, 0, 0, 0, 1],  # x0
+            [0, 0, 0, 1, 0, 0, 0, 0, 1],  # x1
+            [0, 0, 0, 0, 1, 0, 0, 0, 1],  # x2
+            [0, 0, 0, 0, 0, 1, 0, 0, 1],  # x3
+            [0, 0, 0, 0, 0, 0, 1, 0, 1],  # x4
+            [0, 0, 0, 0, 0, 0, 0, 1, 1],  # x5
+            [0, 0, 0, 0, 0, 0, 0, 0, 1],  # x6
+            [0, 0, 0, 0, 0, 0, 0, 0, 1],  # x7
+            [0, 0, 0, 0, 0, 0, 0, 0, 0]   # x8
+        ]
+
+        if adjacency_graph_format == "list":
+            to_return += (adjacency_graph,)
+        else:
+            adjacency_graph = np.array(adjacency_graph)
+            if adjacency_graph_format == "numpy":
+                to_return += (adjacency_graph,)
+            else:
+                to_return += (torch.tensor(adjacency_graph),)
+
+    return to_return

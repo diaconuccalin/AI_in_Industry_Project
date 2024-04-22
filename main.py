@@ -23,23 +23,10 @@ def main_sanity_check():
 
 
 def evaluation_demo():
-    gt = torch.tensor(np.array(
-        [
-            [0, 1, 0],
-            [0, 0, 0],
-            [1, 0, 0]
-        ]
-    ))
-
-    pred = torch.tensor(np.array(
-        [
-            [0, 1, 1],
-            [0, 0, 0],
-            [0, 0, 0]
-        ]
-    ))
-
-    print(eval_all(pred, gt))
+    print(eval_all(
+        large_backdoor(1, False, True, "torch")[0],
+        weak_arrows(1, False, True, "torch")[0])
+    )
 
     return None
 
