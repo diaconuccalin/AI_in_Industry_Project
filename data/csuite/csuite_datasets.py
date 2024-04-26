@@ -31,7 +31,7 @@ def sanity_check(csuite_dataset, samples=None, original_data_base_path="data/csu
     if samples is None:
         samples = len(original_df)
 
-    generated_df = csuite_dataset(samples)
+    generated_df = csuite_dataset(samples)[0]
     original_df.columns = generated_df.columns
 
     sns.set_style("ticks", {"axes.grid": True})
