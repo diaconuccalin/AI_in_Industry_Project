@@ -6,15 +6,6 @@ from evaluation.metrics import eval_all
 from models.causica_deci import causica_deci
 
 
-def evaluation_demo():
-    print(eval_all(
-        large_backdoor(1, False, True, "torch")[0],
-        weak_arrows(1, False, True, "torch")[0])
-    )
-
-    return None
-
-
 def main_deci():
     available_csuite_datasets = [
         lingauss, linexp, nonlingauss, nonlin_simpson, symprod_simpson, large_backdoor, weak_arrows
@@ -49,8 +40,6 @@ def main_deci():
 
 
 def main():
-    evaluation_demo()
-
     main_deci()
 
     return None
