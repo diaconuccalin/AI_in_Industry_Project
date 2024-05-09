@@ -13,7 +13,7 @@ from utils.params import SEED
 # Adapted from https://www.bnlearn.com/research/sachs05/
 # and https://github.com/vspinu/bnlearn/blob/fec3cc0371fabfb6fe7abe0574038522beb2aa13/R/discretize.R
 # and https://dspace.mit.edu/handle/1721.1/8699?show=full
-def hartemink_discretization(df=None, breaks=3, initial_breaks=60):
+def hartemink_discretization(df, breaks=3, initial_breaks=60):
     # Cache useful quantities
     nodes = df.columns
 
@@ -24,7 +24,8 @@ def hartemink_discretization(df=None, breaks=3, initial_breaks=60):
 
     # Count down through discretization levels
     for n_levels in range(initial_breaks, breaks, -1):
-        print(n_levels)
+        if n_levels % 10 == 0:
+            print(f"Working on the {n_levels}th level of discretization.")
         # Go through each variable
         for node in nodes:
             # Prepare df by isolating current node
@@ -103,10 +104,13 @@ def bnlearn_csuite(csuite_dataset=lingauss, samples=500, apply_hartemink_discret
         ] = 1
 
     # Print scores
+    print("\n~~~~~~~~~~ RESULTS ~~~~~~~~~~")
     print(eval_all(torch.Tensor(pred_adj_graph), gt_adj_graph))
+    print()
 
     # Estimate cpds
     if estimate_cpds:
+        print("\n~~~~~~~~~~ CPDs ~~~~~~~~~~")
         learned.fit(df)
 
         for node in learned.nodes():

@@ -3,7 +3,6 @@ from causica.distributions import ContinuousNoiseDist
 from data.csuite.csuite_datasets import *
 from data.sachs.sachs_datasets import unaltered_dataset
 from evaluation.metrics import eval_all
-from models.bnlearn_models import bnlearn_sachs, bnlearn_csuite
 from models.causica_deci import causica_deci
 from utils.params import *
 
@@ -32,17 +31,6 @@ def evaluation_demo():
     )
 
     return None
-
-
-def main_bnlearn_csuite():
-    available_csuite_datasets = [
-        lingauss, linexp, nonlingauss, nonlin_simpson, symprod_simpson, large_backdoor, weak_arrows
-    ]
-
-    for csuite_dataset in available_csuite_datasets:
-        print(csuite_dataset.__name__)
-        bnlearn_csuite(csuite_dataset=csuite_dataset, estimate_cpds=True)
-        print("\n")
 
 
 def main_deci():
@@ -81,10 +69,6 @@ def main_deci():
 def main():
     main_sanity_check()
     evaluation_demo()
-
-    main_bnlearn_csuite()
-    print("Sachs dataset:")
-    bnlearn_sachs()
 
     main_deci()
 
