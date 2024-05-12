@@ -122,7 +122,7 @@ def causica_deci(df, train_config):
             loss.to(device=device)
 
             # Log metrics
-            if epoch % 10 == 0 and i == 0:
+            if epoch % 100 == 0 and i == 0:
                 print(
                     f"epoch:{epoch} loss:{loss.item():.5g} nll:{-batch_log_prob.detach().cpu().numpy():.5g} "
                     f"dagness:{constraint.item():.5f} num_edges:{(sem.graph > 0.0).sum()} "
