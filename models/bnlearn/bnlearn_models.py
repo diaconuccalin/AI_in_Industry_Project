@@ -12,7 +12,7 @@ from utils.solution_utils import hartemink_discretization
 # Adapted from https://www.bnlearn.com/research/sachs05/
 # and https://github.com/vspinu/bnlearn/blob/fec3cc0371fabfb6fe7abe0574038522beb2aa13/R/discretize.R
 # and https://dspace.mit.edu/handle/1721.1/8699?show=full
-def bnlearn_solution(df, apply_hartemink_discretization=True):
+def bnlearn_solution(df, apply_hartemink_discretization=True, score="bge"):
     if apply_hartemink_discretization:
         df = hartemink_discretization(df)
 
@@ -20,14 +20,14 @@ def bnlearn_solution(df, apply_hartemink_discretization=True):
     learned = hc(
         df=df,
         bn_type=GaussianNetworkType(),
-        score="bge",
+        score=score,
         seed=SEED
     )
 
     return learned
 
 
-def bnlearn_sachs(apply_hartemink_discretization=False):
+def bnlearn_sachs(apply_hartemink_discretization=False, score="bge"):
     # Get sachs set
     df, correlation_dict, gt_adj_graph = unaltered_dataset(
         get_data=True,
@@ -35,7 +35,7 @@ def bnlearn_sachs(apply_hartemink_discretization=False):
         return_adjacency_graph=True)
 
     # Apply bnlearn model
-    learned = bnlearn_solution(df, apply_hartemink_discretization=apply_hartemink_discretization)
+    learned = bnlearn_solution(df, apply_hartemink_discretization=apply_hartemink_discretization, score=score)
 
     # Construct adjacency graph
     pred_adj_graph = np.zeros_like(np.array(gt_adj_graph))
@@ -49,7 +49,13 @@ def bnlearn_sachs(apply_hartemink_discretization=False):
     print(eval_all(torch.Tensor(pred_adj_graph), gt_adj_graph))
 
 
-def bnlearn_csuite(csuite_dataset=lingauss, samples=500, apply_hartemink_discretization=False, estimate_cpds=False):
+def bnlearn_csuite(
+        csuite_dataset=lingauss,
+        samples=500,
+        apply_hartemink_discretization=False,
+        estimate_cpds=False,
+        score="bge"
+):
     # Get set
     df, gt_adj_graph = csuite_dataset(
         samples,
@@ -58,7 +64,7 @@ def bnlearn_csuite(csuite_dataset=lingauss, samples=500, apply_hartemink_discret
     )
 
     # Apply bnlearn model
-    learned = bnlearn_solution(df, apply_hartemink_discretization=apply_hartemink_discretization)
+    learned = bnlearn_solution(df, apply_hartemink_discretization=apply_hartemink_discretization, score=score)
 
     # Construct adjacency graph
     pred_adj_graph = np.zeros_like(np.array(gt_adj_graph))

@@ -10,8 +10,10 @@ from causica.sem.sem_distribution import SEMDistributionModule
 from causica.training.auglag import AugLagLRConfig, AugLagLR, AugLagLossCalculator
 from torch.utils.data import DataLoader
 
+from evaluation.metrics import eval_all
 
-def causica_deci(df, train_config):
+
+def causica_deci(df, train_config, gt_graph=None):
     # Set training device
     # device = "cuda" if torch.cuda.is_available() else "cpu"
     device = "cpu"
@@ -130,6 +132,10 @@ def causica_deci(df, train_config):
                     f"step:{scheduler.outer_opt_counter}|{scheduler.step_counter} "
                     f"num_lr_updates:{scheduler.num_lr_updates}"
                 )
+
+                if gt_graph is not None:
+                    pred_graph = adjacency_dist().mode.cpu().numpy()
+                    print(eval_all(torch.tensor(pred_graph), gt_graph))
 
     # Obtain result
     vardist = adjacency_dist()
