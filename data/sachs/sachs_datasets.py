@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import pandas as pd
 import torch
 
@@ -12,7 +13,9 @@ def unaltered_dataset(
     to_return = tuple()
 
     if get_data:
-        to_return += (pd.read_excel("data/sachs/original_data/1.cd3cd28.xls"),)
+        cwd = os.path.abspath(os.getcwd())
+        root_path = cwd[:cwd.find("Industry_Project")] + "Industry_Project"
+        to_return += (pd.read_excel(os.path.join(root_path, "data/sachs/original_data/1.cd3cd28.xls")),)
 
     if return_index_name_correlation:
         to_return += ({

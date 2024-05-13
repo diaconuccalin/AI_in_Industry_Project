@@ -27,11 +27,13 @@ def sanity_check(csuite_dataset, samples=None, original_data_base_path="data/csu
     :return: None
     """
 
-    original_df = pd.read_csv(os.path.join(original_data_base_path, csuite_dataset.__name__ + ".csv"))
+    cwd = os.path.abspath(os.getcwd())
+    root_path = cwd[:cwd.find("Industry_Project")] + "Industry_Project"
+    original_df = pd.read_csv(os.path.join(root_path, original_data_base_path, csuite_dataset.__name__ + ".csv"))
     if samples is None:
         samples = len(original_df)
 
-    generated_df = csuite_dataset(samples)
+    generated_df = csuite_dataset(samples)[0]
     original_df.columns = generated_df.columns
 
     sns.set_style("ticks", {"axes.grid": True})
