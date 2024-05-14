@@ -153,3 +153,58 @@ def dag_gnn_sachs(apply_hartemink_discretization=False, hidden_dim=64, eta=10, g
     return dag_gnn.causal_matrix, gt_adj_graph.numpy(), f1_scores, mt
 
   
+
+def sachs_tuning_GNN():
+    best_results = {}
+    
+    param_grid = {
+       'eta': [4, 6, 8, 10, 12],
+       'gamma': [0.10, 0.15, 0.25, 0.35, 0.45],
+       'hidden_dim':[4, 8, 16, 32]
+    }
+
+    df, correlation_dict, gt_adj_graph = unaltered_dataset(
+        get_data=True,
+        return_index_name_correlation=True,
+        return_adjacency_graph=True)
+    
+    df = df.to_numpy()
+    x = torch.from_numpy(df)
+        
+    best_adj_score = 0  
+    best_orientation_score = 0
+    best_params_adj = None  
+    best_params_orientation = None 
+        
+
+    for params in ParameterGrid(param_grid):
+            adj_score = 0
+            orientation_score = 0
+            
+            eta = params['eta']
+            gamma = params['gamma']
+            hidden_dim = params['hidden_dim']
+            
+            dag_gnn = DAG_GNN(epochs=10, encoder_hidden=hidden_dim, decoder_hidden=hidden_dim ,eta= eta, gamma= gamma)
+            dag_gnn.learn(x)
+    
+            f1_scores = (eval_all(torch.tensor(dag_gnn.causal_matrix), gt_adj_graph))
+            
+            # Calculate combined score 
+            adj_score = f1_scores['adjacency_f1'] 
+            orientation_score = f1_scores['orientation_f1']
+
+            # Check if current combined score is better than previous best
+            if adj_score > best_adj_score:
+                best_adj_score = adj_score
+                best_params_adj = params
+                
+            if orientation_score > best_orientation_score:
+                best_orientation_score = orientation_score
+                best_params_orientation = params
+                
+
+        # Update best results for this dataset
+    best_results['sachs'] = {'best_adj_score': best_adj_score, 'best_orientation_score' : best_orientation_score ,'best_params_adj': best_params_adj, 'best_params_or': best_params_orientation}
+    print("The tuning of Sachs is done.")
+    return best_results

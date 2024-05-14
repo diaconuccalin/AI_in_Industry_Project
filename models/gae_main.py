@@ -325,4 +325,75 @@ def gae_cs(dataset, apply_hartemink_discretization=False, beta = 2, gamma = 0.25
     #print(mt.metrics)
     return causal_matrix, gt_graph.numpy(), f1_scores, mt
     
+   
+
+def sachs_tuning_gae():
+    best_results = {}
+    graph_threshold = 0.3
     
+    param_grid = {
+       'beta': [2, 2.5, 3, 3.5, 4],
+       'gamma': [0.10, 0.25, 0.35, 0.45],
+       'hidden_dim':[4, 8, 16, 32]
+    }
+
+    df, correlation_dict, gt_adj_graph = unaltered_dataset(
+        get_data=True,
+        return_index_name_correlation=True,
+        return_adjacency_graph=True)
+    
+    df = df.to_numpy()
+    x = torch.from_numpy(df)
+        
+    best_adj_score = 0  
+    best_orientation_score = 0
+    best_params_adj = None  
+    best_params_orientation = None 
+        
+
+    for params in ParameterGrid(param_grid):
+            adj_score = 0
+            orientation_score = 0
+            
+            beta = params['beta']
+            gamma = params['gamma']
+            hidden_dim = params['hidden_dim']
+            
+            n, d, x, input_dim = prepare_input_data(x)
+        
+            model = GAE(d, input_dim, latent_dim=1 ,hidden_dim=hidden_dim)
+        
+            adj_matrix = train_gae(model, x, n, lr=1e-3, alpha=0.0, beta=beta, rho=1.0, 
+                               l1_penalty=0.0, 
+                               rho_threshold=1e30,
+                               h_threshold=1e-8,
+                               gamma=gamma,
+                               update_freq=200
+                            )
+            
+            # Normalize the adjacency matrix
+            adj_matrix = (adj_matrix / torch.max(abs(adj_matrix)))
+            adj_matrix = adj_matrix.detach().cpu().numpy()
+        
+            causal_matrix = (np.abs(adj_matrix) > graph_threshold).astype(int)
+    
+            f1_scores = (eval_all(torch.tensor(causal_matrix), gt_adj_graph))
+            
+            # Calculate combined score 
+            adj_score = f1_scores['adjacency_f1'] 
+            orientation_score = f1_scores['orientation_f1']
+
+            # Check if current combined score is better than previous best
+            if adj_score > best_adj_score:
+                best_adj_score = adj_score
+                best_params_adj = params
+                
+            if orientation_score > best_orientation_score:
+                best_orientation_score = orientation_score
+                best_params_orientation = params
+                
+
+        # Update best results for this dataset
+    best_results['sachs'] = {'best_adj_score': best_adj_score, 'best_orientation_score' : best_orientation_score ,'best_params_adj': best_params_adj, 'best_params_or': best_params_orientation}
+    print("The tuning of Sachs is done.")
+    return best_results
