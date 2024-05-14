@@ -28,11 +28,26 @@ def causal_rl(df, gt_adj_graph, method_name, params):
 
   return met2
 
-def train_evaluate_model(model, df, gt_adj_graph , hyperparameters):
-    rl_model = model(**hyperparameters)
-    rl_model.learn(df)
+def train_evaluate_model(df, gt_adj_graph , hyperparameters):
+  rl_model = RL(**hyperparameters)
+  rl_model.learn(df.values)
 
-    met = eval_all(torch.Tensor(rl_model.causal_matrix), true_dag)
-    rounded_met = {key: round(value, 2) for key, value in met.items()}
+  met = eval_all(torch.Tensor(rl_model.causal_matrix), gt_adj_graph)
+  rounded_met = {key: round(value, 2) for key, value in met.items()}
 
-    return met
+  return met
+
+def tuning_rl(param_grid, datasets):
+  
+  param_combinations = list(ParameterGrid(param_grid))
+  # Perform grid search for each dataset using parallel execution
+  results_rl = {}
+  for dataset_func in datasets:
+    df, gt_adj_graph = dataset_func(20, True, True)
+    results_rl[dataset_func.__name__] = {}
+      # Generate all possible combinations of hyperparameters
+  # Print the generated combinations
+    for params in param_combinations:
+      params_tuple = tuple(params.items())
+      results_rl[dataset_func.__name__][params_tuple] = train_evaluate_model(df, gt_adj_graph, params)
+  return results_rl
